@@ -15,7 +15,7 @@ Supports Node.js versions 6, 8, 10 and 12.
  * [Installation](#installation)
  * [Usage](#usage)
    * [Circuit](#circuit)
-   * [Report the Humidity, Pressure and Temperature](#report-humidity-pressure-and-temperature)
+   * [Report the Humidity, Pressure and Temperature](#report-the-humidity-pressure-and-temperature)
  * [API](#api)
  * [Related Packages](#related-packages)
 
