@@ -1,0 +1,40 @@
+{
+  "name": "bme280",
+  "version": "0.1.0",
+  "description": "BME280 Humidity, Pressure and Temperature Sensor I2C Driver",
+  "main": "bme280.js",
+  "scripts": {
+    "lint": "jshint *.js examples/*.js test/*.js",
+    "test": "cd test && ./run-tests && cd .."
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/fivdi/bme280.git"
+  },
+  "engines": {
+    "node": ">=6.0.0"
+  },
+  "dependencies": {
+    "i2c-bus": "^5.0.0"
+  },
+  "devDependencies": {
+    "jshint": "^2.10.2"
+  },
+  "keywords": [
+    "bme280",
+    "temperature",
+    "humidity",
+    "pressure",
+    "sensor",
+    "iot",
+    "i2c",
+    "raspberry",
+    "raspi",
+    "rpi",
+    "pi",
+    "beaglebone",
+    "linux"
+  ],
+  "author": "fivdi",
+  "license": "MIT"
+}

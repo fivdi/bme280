@@ -1,0 +1,4 @@
+#!/bin/sh
+echo open-read-close
+node open-read-close
+
