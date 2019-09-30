@@ -23,7 +23,7 @@ const readAndReport = bme280Sensor =>
   delay(40).
   then(_ => bme280Sensor.read()).
   then(reading => print(reading)).
-  then(_ => readAndReport(bme280Sensor)).
+  then(_ => setImmediate(_ => readAndReport(bme280Sensor))).
   catch(console.log);
 
 bme280.open().
