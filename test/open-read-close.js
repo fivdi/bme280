@@ -1,16 +1,12 @@
 'use strict';
 
 const bme280 = require('../');
+const util = require('./util');
 
-bme280.open({i2cAddress: 0x77}).then(sensor =>
-  sensor.read().
-  then(reading =>
-    console.log(
-      '     humidity = ' + reading.humidity + '%, ' +
-      '     pressure = ' + reading.pressure + ' hPa, ' +
-      '  temperature = ' + reading.temperature + '°C'
-    )
-  ).
+bme280.open().then(sensor =>
+  util.delay(40).
+  then(_ => sensor.read()).
+  then(reading => console.log(`  ${util.format(reading)}`)).
   then(_ => sensor.close())
 ).catch(console.log);
 
