@@ -5,12 +5,12 @@ const bme280 = require('../');
 const delay = milliseconds =>
   new Promise(resolve => setTimeout(resolve, milliseconds));
 
-bme280.open().then(bme280Sensor =>
+bme280.open().then(sensor =>
   delay(40).
-  then(_ => bme280Sensor.read()).
+  then(_ => sensor.read()).
   then(reading => {
     console.log(reading);
-    return bme280Sensor.close();
+    return sensor.close();
   })
 ).catch(console.log);
 

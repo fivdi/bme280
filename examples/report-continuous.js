@@ -9,8 +9,8 @@ const delay = milliseconds =>
 
 let count = 0;
 
-const read = bme280Sensor =>
-  delay(40).then(_ => bme280Sensor.read());
+const read = sensor =>
+  delay(40).then(_ => sensor.read());
 
 const report = reading =>
   console.log(
@@ -20,14 +20,14 @@ const report = reading =>
     `${round(reading.humidity)}%`
   );
 
-const reportContinuous = bme280Sensor =>
-  read(bme280Sensor).
+const reportContinuous = sensor =>
+  read(sensor).
   then(reading => {
     report(reading);
-    setImmediate(_ => reportContinuous(bme280Sensor));
+    setImmediate(_ => reportContinuous(sensor));
   });
 
 bme280.open().
-then(bme280Sensor => reportContinuous(bme280Sensor)).
+then(sensor => reportContinuous(sensor)).
 catch(console.log);
 
