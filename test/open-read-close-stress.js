@@ -12,7 +12,7 @@ const openReadCloseOnce = _ =>
       sensor.close().
       then(_ => reading)
     )
-  ).catch(console.log);
+  );
 
 const openReadClose = count =>
   openReadCloseOnce().
