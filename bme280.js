@@ -70,6 +70,7 @@ const CTRL_MEAS = {
 
 // CONFIG register
 const CONFIG = {
+  FILTER_MASK: 0x1c,
   FILTER_POS: 2
 };
 
@@ -259,8 +260,11 @@ class Bme280I2c {
       (this._pressureOversampling << CTRL_MEAS.OSRS_P_POS) |
       (MODE.NORMAL << CTRL_MEAS.MODE_POS)
     )).
-    then(_ => this.writeByte(
-      REGS.CONFIG, this._filterCoefficient << CONFIG.FILTER_POS
+    then(_ => this.readByte(REGS.CONFIG)).
+    then(configReg => this.writeByte(
+      REGS.CONFIG,
+      (configReg & ~CONFIG.FILTER_MASK) |
+      (this._filterCoefficient << CONFIG.FILTER_POS)
     ));
   }
 
