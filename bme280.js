@@ -5,67 +5,73 @@ const i2c = require('i2c-bus');
 const DEFAULT_I2C_BUS = 1;
 const DEFAULT_I2C_ADDRESS = 0x77;
 
-// Registers
-const TP_COEFFICIENT_REGS = 0x88;
-const CHIP_ID_REG = 0xd0;
-const RESET_REG = 0xe0;
-const H_COEFFICIENT_REGS = 0xe1;
-const CTRL_HUM_REG = 0xf2;
-const STATUS_REG = 0xf3;
-const CTRL_MEAS_REG = 0xf4;
-const CONFIG_REG = 0xf5;
-const DATA_REGS = 0xf7;
+const OVERSAMPLE = {
+  SKIPPED: 0,
+  X1: 1,
+  X2: 2,
+  X4: 3,
+  X8: 4,
+  X16: 5
+};
 
-const TP_COEFFICIENT_REGS_LEN = 26;
-const H_COEFFICIENT_REGS_LEN = 7;
-const DATA_REGS_LEN = 8;
+const MODE = {
+  SLEEP: 0,
+  FORCED: 1,
+  NORMAL: 3
+};
 
-// CHIP_ID_REG
+const FILTER = {
+  OFF: 0,
+  X2: 1,
+  X4: 2,
+  X8: 3,
+  X16: 4
+};
+
+const REGS = {
+  TP_COEFFICIENT: 0x88,
+  CHIP_ID: 0xd0,
+  RESET: 0xe0,
+  H_COEFFICIENT: 0xe1,
+  CTRL_HUM: 0xf2,
+  STATUS: 0xf3,
+  CTRL_MEAS: 0xf4,
+  CONFIG: 0xf5,
+  DATA: 0xf7
+};
+
+const REG_LENGTHS = {
+  TP_COEFFICIENT: 26,
+  H_COEFFICIENT: 7,
+  DATA: 8
+};
+
 const CHIP_ID = 0x60;
-
-// RESET_REG
 const SOFT_RESET_COMMAND = 0xb6;
 
-// CTRL_HUM_REG
-const OSRS_H_BITS = 0x07;
-const OSRS_H_SKIPPED = 0x00;
-const OSRS_H_X1 = 0x01;
-const OSRS_H_X2 = 0x02;
-const OSRS_H_X4 = 0x03;
-const OSRS_H_X8 = 0x04;
-const OSRS_H_X16 = 0x05;
+// STATUS register
+const STATUS = Object.freeze({
+  IM_UPDATE_BIT: 0x01,
+  MEASURING_BIT: 0x08
+});
 
-// STATUS_REG
-const IM_UPDATE_BIT = 0x01;
-const MEASURING_BIT = 0x08;
+// CTRL_HUM register
+const CTRL_HUM = {
+  OSRS_H_MASK: 0x07,
+  OSRS_H_POS: 0x00
+};
 
-// CTRL_MEAS_REG
-const MODE_BITS = 0x03;
-const MODE_SLEEP = 0x00;
-const MODE_FORCED = 0x01;
-const MODE_NORMAL = 0x03;
-const OSRS_P_BITS = 0x1c;
-const OSRS_P_SKIPPED = 0x00;
-const OSRS_P_X1 = 0x04;
-const OSRS_P_X2 = 0x08;
-const OSRS_P_X4 = 0x0c;
-const OSRS_P_X8 = 0x10;
-const OSRS_P_X16 = 0x14;
-const OSRS_T_BITS = 0xe0;
-const OSRS_T_SKIPPED = 0x00;
-const OSRS_T_X1 = 0x20;
-const OSRS_T_X2 = 0x40;
-const OSRS_T_X4 = 0x60;
-const OSRS_T_X8 = 0x80;
-const OSRS_T_X16 = 0xa0;
+// CTRL_MEAS register
+const CTRL_MEAS = {
+  MODE_POS: 0x00,
+  OSRS_P_POS: 0x02,
+  OSRS_T_POS: 0x05
+};
 
-// CONFIG_REG
-const FILTER_COEFF_BITS = 0x1c;
-const FILTER_COEFF_OFF = 0x00;
-const FILTER_COEFF_2 = 0x04;
-const FILTER_COEFF_4 = 0x08;
-const FILTER_COEFF_8 = 0x0c;
-const FILTER_COEFF_16 = 0x10;
+// CONFIG register
+const CONFIG = {
+  FILTER_POS: 2
+};
 
 const delay = milliseconds =>
   new Promise(resolve => setTimeout(resolve, milliseconds + 1));
@@ -142,7 +148,7 @@ class Bme280I2c {
   }
 
   checkChipId(tries = 5) {
-    return this.readByte(CHIP_ID_REG).
+    return this.readByte(REGS.CHIP_ID).
     then(chipId => {
       if (chipId !== CHIP_ID) {
         return Promise.reject(new Error(
@@ -159,14 +165,14 @@ class Bme280I2c {
   }
 
   softReset() {
-    return this.writeByte(RESET_REG, SOFT_RESET_COMMAND);
+    return this.writeByte(REGS.RESET, SOFT_RESET_COMMAND);
   }
 
   waitForImageRegisterUpdate(tries = 5) {
     return delay(2).
-    then(_ => this.readByte(STATUS_REG)).
+    then(_ => this.readByte(REGS.STATUS)).
     then(statusReg => {
-      if ((statusReg & IM_UPDATE_BIT) !== 0) {
+      if ((statusReg & STATUS.IM_UPDATE_BIT) !== 0) {
         if (tries - 1 > 0) {
           return this.waitForImageRegisterUpdate(tries - 1);
         }
@@ -176,14 +182,14 @@ class Bme280I2c {
   }
 
   readCoefficients() {
-    const tpRegs = Buffer.alloc(TP_COEFFICIENT_REGS_LEN);
-    const hRegs = Buffer.alloc(H_COEFFICIENT_REGS_LEN);
+    const tpRegs = Buffer.alloc(REG_LENGTHS.TP_COEFFICIENT);
+    const hRegs = Buffer.alloc(REG_LENGTHS.H_COEFFICIENT);
 
     return this.readI2cBlock(
-      TP_COEFFICIENT_REGS, TP_COEFFICIENT_REGS_LEN, tpRegs
+      REGS.TP_COEFFICIENT, REG_LENGTHS.TP_COEFFICIENT, tpRegs
     ).
     then(_ => this.readI2cBlock(
-      H_COEFFICIENT_REGS, H_COEFFICIENT_REGS_LEN, hRegs
+      REGS.H_COEFFICIENT, REG_LENGTHS.H_COEFFICIENT, hRegs
     )).
     then(_ => {
       this._coefficients = Object.freeze({
@@ -212,24 +218,24 @@ class Bme280I2c {
   }
 
   configureSettings() {
-    return this.readByte(CTRL_HUM_REG).
+    return this.readByte(REGS.CTRL_HUM).
     then(ctrlHumReg => this.writeByte(
-      CTRL_HUM_REG, (ctrlHumReg & ~OSRS_H_BITS) | OSRS_H_X1
+      REGS.CTRL_HUM,
+      (ctrlHumReg & ~CTRL_HUM.OSRS_H_MASK) |
+      (OVERSAMPLE.X1 << CTRL_HUM.OSRS_H_POS)
     )).
-    then(_ => this.readByte(CTRL_MEAS_REG)).
-    then(ctrlMessReg => this.writeByte(
-      CTRL_MEAS_REG,
-      (ctrlMessReg & ~(OSRS_T_BITS | OSRS_P_BITS)) |
-        OSRS_T_X2 | 
-        OSRS_P_X16 |
-        MODE_NORMAL
+    then(_ => this.writeByte(
+      REGS.CTRL_MEAS,
+      (OVERSAMPLE.X2 << CTRL_MEAS.OSRS_T_POS) |
+      (OVERSAMPLE.X16 << CTRL_MEAS.OSRS_P_POS) |
+      (MODE.NORMAL << CTRL_MEAS.MODE_POS)
     )).
-    then(_ => this.writeByte(CONFIG_REG, FILTER_COEFF_16));
+    then(_ => this.writeByte(REGS.CONFIG, FILTER.X16 << CONFIG.FILTER_POS));
   }
 
   readRawData() {
     return this.readI2cBlock(
-      DATA_REGS, DATA_REGS_LEN, Buffer.alloc(DATA_REGS_LEN)
+      REGS.DATA, REG_LENGTHS.DATA, Buffer.alloc(REG_LENGTHS.DATA)
     ).
     then(dataRegs => {
       const regs = dataRegs.buffer;
