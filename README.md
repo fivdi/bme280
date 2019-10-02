@@ -4,7 +4,7 @@
 
 # bme280
 
-BME280 humidity, pressure and temperature sensor I2C driver for Node.js on
+Node.js I2C driver for the BME280 humidity, pressure and temperature sensor on
 Linux boards like the Raspberry Pi or BeagleBone.
 
 Supports Node.js versions 6, 8, 10 and 12.
