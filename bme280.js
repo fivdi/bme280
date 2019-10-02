@@ -22,10 +22,10 @@ const MODE = {
 
 const FILTER = {
   OFF: 0,
-  X2: 1,
-  X4: 2,
-  X8: 3,
-  X16: 4
+  F2: 1,
+  F4: 2,
+  F8: 3,
+  F16: 4
 };
 
 const REGS = {
@@ -79,24 +79,29 @@ const delay = milliseconds =>
 const open = options => {
   return Promise.resolve().then(_ => {
     options = options || {};
+
     const errMsg = validateOpenOptions(options);
     if (errMsg) {
       return Promise.reject(new Error(errMsg));
     }
 
-    const i2cBusNumber = options.i2cBusNumber !== undefined ?
-      options.i2cBusNumber : DEFAULT_I2C_BUS;
-    return i2c.openPromisified(i2cBusNumber);
+    options = Object.assign({
+      i2cBusNumber: DEFAULT_I2C_BUS,
+      i2cAddress: DEFAULT_I2C_ADDRESS,
+      humidityOversampling: OVERSAMPLE.X1,
+      pressureOversampling: OVERSAMPLE.X16,
+      temperatureOversampling: OVERSAMPLE.X2,
+      filterCoefficient: FILTER.F16
+    }, options);
+
+    return i2c.openPromisified(options.i2cBusNumber);
   }).
   then(i2cBus => {
-    const i2cAddress = options.i2cAddress !== undefined ?
-      options.i2cAddress : DEFAULT_I2C_ADDRESS;
-    const bme280I2c = new Bme280I2c(i2cBus, i2cAddress);
+    const bme280I2c = new Bme280I2c(i2cBus, options);
 
     return bme280I2c.initialize().then(_ => new Bme280(bme280I2c));
   });
 };
-module.exports.open = open;
 
 const validateOpenOptions = options => {
   if (typeof options !== 'object') {
@@ -106,9 +111,7 @@ const validateOpenOptions = options => {
 
   if (options.i2cBusNumber !== undefined &&
       (!Number.isSafeInteger(options.i2cBusNumber) ||
-       options.i2cBusNumber < 0
-      )
-     ) {
+       options.i2cBusNumber < 0)) {
     return 'Expected i2cBusNumber to be a non-negative integer.' +
       ' Got "' + options.i2cBusNumber + '".';
   }
@@ -116,20 +119,46 @@ const validateOpenOptions = options => {
   if (options.i2cAddress !== undefined &&
       (!Number.isSafeInteger(options.i2cAddress) ||
        options.i2cAddress < 0 ||
-       options.i2cAddress > 0x7f
-      )
-     ) {
+       options.i2cAddress > 0x7f)) {
     return 'Expected i2cAddress to be an integer' +
       ' >= 0 and <= 0x7f. Got "' + options.i2cAddress + '".';
+  }
+
+  if (options.humidityOversampling !== undefined &&
+      !Object.values(OVERSAMPLE).includes(options.humidityOversampling)) {
+    return 'Expected humidityOversampling to be a value from Enum' +
+      ' OVERSAMPLE. Got "' + options.humidityOversampling + '".';
+  }
+
+  if (options.pressureOversampling !== undefined &&
+      !Object.values(OVERSAMPLE).includes(options.pressureOversampling)) {
+    return 'Expected pressureOversampling to be a value from Enum' +
+      ' OVERSAMPLE. Got "' + options.pressureOversampling + '".';
+  }
+
+  if (options.temperatureOversampling !== undefined &&
+      !Object.values(OVERSAMPLE).includes(options.temperatureOversampling)) {
+    return 'Expected temperatureOversampling to be a value from Enum' +
+      ' OVERSAMPLE. Got "' + options.temperatureOversampling + '".';
+  }
+
+  if (options.filterCoefficient !== undefined &&
+      !Object.values(OVERSAMPLE).includes(options.filterCoefficient)) {
+    return 'Expected filterCoefficient to be a value from Enum' +
+      ' FILTER. Got "' + options.filterCoefficient + '".';
   }
 
   return null;
 };
 
 class Bme280I2c {
-  constructor(i2cBus, i2cAddress) {
+  constructor(i2cBus, options) {
     this._i2cBus = i2cBus;
-    this._i2cAddress = i2cAddress;
+    this._i2cAddress = options.i2cAddress;
+    this._humidityOversampling = options.humidityOversampling;
+    this._pressureOversampling = options.pressureOversampling;
+    this._temperatureOversampling = options.temperatureOversampling;
+    this._filterCoefficient = options.filterCoefficient;
     this._coefficients = null;
   }
 
@@ -222,15 +251,17 @@ class Bme280I2c {
     then(ctrlHumReg => this.writeByte(
       REGS.CTRL_HUM,
       (ctrlHumReg & ~CTRL_HUM.OSRS_H_MASK) |
-      (OVERSAMPLE.X1 << CTRL_HUM.OSRS_H_POS)
+      (this._humidityOversampling << CTRL_HUM.OSRS_H_POS)
     )).
     then(_ => this.writeByte(
       REGS.CTRL_MEAS,
-      (OVERSAMPLE.X2 << CTRL_MEAS.OSRS_T_POS) |
-      (OVERSAMPLE.X16 << CTRL_MEAS.OSRS_P_POS) |
+      (this._temperatureOversampling << CTRL_MEAS.OSRS_T_POS) |
+      (this._pressureOversampling << CTRL_MEAS.OSRS_P_POS) |
       (MODE.NORMAL << CTRL_MEAS.MODE_POS)
     )).
-    then(_ => this.writeByte(REGS.CONFIG, FILTER.X16 << CONFIG.FILTER_POS));
+    then(_ => this.writeByte(
+      REGS.CONFIG, this._filterCoefficient << CONFIG.FILTER_POS
+    ));
   }
 
   readRawData() {
@@ -297,12 +328,26 @@ class Bme280I2c {
 
   compensateRawData(rawData) {
     const tFine = this.compensateTemperature(rawData.temperature);
-    const humidity = this.compensateHumidity(rawData.humidity, tFine);
-    const pressure = this.compensatePressure(rawData.pressure, tFine);
+    let pressure = this.compensatePressure(rawData.pressure, tFine);
+    let humidity = this.compensateHumidity(rawData.humidity, tFine);
+
+    let temperature = tFine / 5120;
+    if (this._temperatureOversampling === OVERSAMPLE.SKIPPED) {
+      temperature = undefined;
+    }
+
+    pressure = pressure / 100;
+    if (this._pressureOversampling === OVERSAMPLE.SKIPPED) {
+      pressure = undefined;
+    }
+    
+    if (this._humidityOversampling === OVERSAMPLE.SKIPPED) {
+      humidity = undefined;
+    }
 
     return {
-      temperature: tFine / 5120,
-      pressure: pressure / 100,
+      temperature: temperature,
+      pressure: pressure,
       humidity: humidity
     };
   }
@@ -338,4 +383,10 @@ class Bme280 {
     return this._bme280I2c.read();
   }
 }
+
+module.exports = {
+  open: open,
+  OVERSAMPLE: OVERSAMPLE,
+  FILTER: FILTER
+};
 

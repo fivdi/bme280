@@ -6,7 +6,7 @@ module.exports.delay = milliseconds =>
   new Promise(resolve => setTimeout(resolve, milliseconds + 1));
 
 module.exports.format = reading =>
-  `${round(reading.temperature)}°C, ` +
-  `${round(reading.pressure)} hPa, ` +
-  `${round(reading.humidity)}%`;
+  (reading.temperature ? `${round(reading.temperature)}°C` : '') +
+  (reading.pressure ? `, ${round(reading.pressure)} hPa` : '') +
+  (reading.humidity ? `, ${round(reading.humidity)}%` : '');
 

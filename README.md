@@ -63,14 +63,14 @@ Sample output:
 ```
 ## API
 
+- [Functions](#functions)
+- [Class Bme280](#class-bme280)
+- [Enum OVERSAMPLE](#enum-oversample)
+- [Enum FILTER](#enum-filter)
+
 ### Functions
 
 - [open([options])](#openoptions)
-
-### Class Bme280
-
-- [close()](#close)
-- [read()](#read)
 
 #### open([options])
 Returns a Promise that will be resolved with a Bme280 object on success, or will be rejected if an error occurs.
@@ -78,6 +78,15 @@ Returns a Promise that will be resolved with a Bme280 object on success, or will
 The following options are supported:
 - i2cBusNumber - integer, I2C bus number, optional, default 1
 - i2cAddress - integer, BME280 I2C address, optional, default 0x77
+- humidityOversampling - One of the [OVERSAMPLE](#enum-oversample) enum values, controls oversampling of humidity data, optional, default OVERSAMPLE.X1
+- pressureOversampling - One of the [OVERSAMPLE](#enum-oversample) enum values, controls oversampling of pressure data, optional, default OVERSAMPLE.X16
+- temperatureOversampling - One of the [OVERSAMPLE](#enum-oversample) enum values, optional, controls oversampling of temperature data, default OVERSAMPLE.X2
+- filterCoefficient - One of the [FILTER](#enum-filter) enum values, optional, slows down the response to the sensor inputs, default FILTER.F16
+
+### Class Bme280
+
+- [close()](#close)
+- [read()](#read)
 
 #### close()
 Returns a Promise that will be resolved with no arguments once the underlying resources have been released, or will be rejected if an error occurs while closing.
@@ -89,6 +98,36 @@ An object containing a sensor reading has the following properties:
 - humidity - number, relative humidity in percent
 - pressure - number, pressure in hectopascal (1 hPa = 1 millibar)
 - temperature - number, temperature in degrees Celsius
+
+### Enum OVERSAMPLE
+
+#### SKIPPED
+Measurement skipped. The corresponding property in a sensor reading object will be undefined.
+#### X1
+Oversampling × 1
+#### X2
+Oversampling × 2
+#### X4
+Oversampling × 4
+#### X8
+Oversampling × 8
+#### X16
+Oversampling × 16
+
+### Enum FILTER
+
+Used to slow down the response to the sensor inputs.
+
+#### OFF
+Filter off
+#### F2
+Filter coefficient = 2
+#### F4
+Filter coefficient = 4
+#### F8
+Filter coefficient = 8
+#### F16
+Filter coefficient = 16
 
 ## Related Packages
 
