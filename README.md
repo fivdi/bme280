@@ -14,14 +14,13 @@ Supports Node.js versions 6, 8, 10 and 12.
  * [Features](#features)
  * [Installation](#installation)
  * [Usage](#usage)
-   * [Circuit](#circuit)
-   * [Report the Humidity, Pressure and Temperature](#report-the-humidity-pressure-and-temperature)
  * [API](#api)
  * [Related Packages](#related-packages)
 
 ## Features
 
  * Easy humidity, pressure and temperature sensing
+ * Supports oversampling and filtering
  * Promise based asynchronous API
 
 ## Installation
