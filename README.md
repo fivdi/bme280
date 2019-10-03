@@ -68,17 +68,31 @@ Sample output:
 - [open([options])](#openoptions)
 
 #### open([options])
-Returns a Promise that will be resolved with a Bme280 object on success, or will be rejected if an error occurs.
+Returns a Promise that will be resolved with a Bme280 object on success, or
+will be rejected if an error occurs.
 
-open waits until the first measurement has completed before resolving.
+The BME280 will be configured to run in 'normal' mode using the specified
+options or defaults for options that are not specified. The defaults for
+oversampling and filtering are those recommended by the BME280 datasheet
+for indoor navigation.
+
+open waits until the BME280 has completed its first measurement before
+resolving.
 
 The following options are supported:
 - i2cBusNumber - integer, I2C bus number, optional, default 1
 - i2cAddress - integer, BME280 I2C address, optional, default 0x77
-- humidityOversampling - One of the [OVERSAMPLE](#enum-oversample) enum values, controls oversampling of humidity data, optional, default OVERSAMPLE.X1
-- pressureOversampling - One of the [OVERSAMPLE](#enum-oversample) enum values, controls oversampling of pressure data, optional, default OVERSAMPLE.X16
-- temperatureOversampling - One of the [OVERSAMPLE](#enum-oversample) enum values, optional, controls oversampling of temperature data, default OVERSAMPLE.X2
-- filterCoefficient - One of the [FILTER](#enum-filter) enum values, optional, slows down the response to the sensor inputs, default FILTER.F16
+- humidityOversampling - One of the [OVERSAMPLE](#enum-oversample) enum
+values, controls oversampling of humidity data, optional, default
+OVERSAMPLE.X1
+- pressureOversampling - One of the [OVERSAMPLE](#enum-oversample) enum
+values, controls oversampling of pressure data, optional, default
+OVERSAMPLE.X16
+- temperatureOversampling - One of the [OVERSAMPLE](#enum-oversample) enum
+values, optional, controls oversampling of temperature data, default
+OVERSAMPLE.X2
+- filterCoefficient - One of the [FILTER](#enum-filter) enum values, optional,
+slows down the response to the sensor inputs, default FILTER.F16
 
 ### Class Bme280
 
@@ -87,10 +101,13 @@ The following options are supported:
 - [typicalMeasurementTime()](#typicalmeasurementtime)
 
 #### close()
-Returns a Promise that will be resolved with no arguments once the underlying resources have been released, or will be rejected if an error occurs while closing.
+Returns a Promise that will be resolved with no arguments once the underlying
+resources have been released, or will be rejected if an error occurs while
+closing.
 
 #### read()
-Returns a Promise that will be resolved with an object containing a sensor reading on success, or will be rejected if an error occurs.
+Returns a Promise that will be resolved with an object containing a sensor
+reading on success, or will be rejected if an error occurs.
 
 An object containing a sensor reading has the following properties:
 - humidity - number, relative humidity in percent
@@ -108,7 +125,8 @@ are used, the typical measurement time is 40 milliseconds.
 ### Enum OVERSAMPLE
 
 #### SKIPPED
-Measurement skipped. The corresponding property in a sensor reading object will be undefined.
+Measurement skipped. The corresponding property in a sensor reading object
+will be undefined.
 #### X1
 Oversampling × 1
 #### X2
