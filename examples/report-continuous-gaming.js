@@ -18,7 +18,7 @@ const reportContinuous = sensor =>
   then(reading => {
     report(reading);
     setTimeout(_ => reportContinuous(sensor), sensor.typicalMeasurementTime());
-  });
+  }).catch(console.log);
 
 /*
  * Here the BME280 is configured to run in 'normal' mode using oversampling

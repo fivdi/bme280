@@ -76,7 +76,7 @@ const reportContinuous = sensor =>
   then(reading => {
     report(reading);
     setTimeout(_ => reportContinuous(sensor), sensor.typicalMeasurementTime());
-  });
+  }).catch(console.log);
 
 /*
  * Here the BME280 is configured to run in 'normal' mode using oversampling
@@ -93,6 +93,7 @@ bme280.open({
 then(sensor => reportContinuous(sensor)).
 catch(console.log);
 ```
+
 Sample output:
 ```
 1 23.09°C, 987.51 hPa
