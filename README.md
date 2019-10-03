@@ -68,7 +68,7 @@ const report = reading =>
   console.log(
     `${++count} ` +
     `${round(reading.temperature)}°C, ` +
-    `${round(reading.pressure)} hPa `
+    `${round(reading.pressure)} hPa`
   );
 
 const reportContinuous = sensor =>
@@ -94,7 +94,7 @@ then(sensor => reportContinuous(sensor)).
 catch(console.log);
 ```
 Sample output:
-```js
+```
 1 23.09°C, 987.51 hPa
 2 23.10°C, 987.54 hPa
 3 23.10°C, 987.54 hPa
