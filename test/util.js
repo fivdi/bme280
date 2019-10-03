@@ -1,6 +1,6 @@
 'use strict';
 
-const round = f => parseFloat(Math.round(f * 100) / 100).toFixed(2);
+const round = f => (Math.round(f * 100) / 100).toFixed(2);
 
 module.exports.delay = milliseconds =>
   new Promise(resolve => setTimeout(resolve, milliseconds + 1));

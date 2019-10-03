@@ -60,7 +60,7 @@ Sample output:
 ```js
 const bme280 = require('bme280');
 
-const round = f => parseFloat(Math.round(f * 100) / 100).toFixed(2);
+const round = f => (Math.round(f * 100) / 100).toFixed(2);
 
 let count = 0;
 

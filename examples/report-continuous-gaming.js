@@ -2,7 +2,7 @@
 
 const bme280 = require('../');
 
-const round = f => parseFloat(Math.round(f * 100) / 100).toFixed(2);
+const round = f => (Math.round(f * 100) / 100).toFixed(2);
 
 let count = 0;
 
