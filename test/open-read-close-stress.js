@@ -11,8 +11,7 @@ const openReadCloseOnce = _ =>
     filterCoefficient: bme280.FILTER.OFF
   }).
   then(sensor =>
-    util.delay(4).
-    then(_ => sensor.read()).
+    sensor.read().
     then(reading =>
       sensor.close().
       then(_ => reading)

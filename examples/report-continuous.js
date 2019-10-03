@@ -9,9 +9,6 @@ const delay = milliseconds =>
 
 let count = 0;
 
-const read = sensor =>
-  delay(40).then(_ => sensor.read());
-
 const report = reading =>
   console.log(
     `${++count} ` +
@@ -21,10 +18,11 @@ const report = reading =>
   );
 
 const reportContinuous = sensor =>
-  read(sensor).
+  sensor.read().
   then(reading => {
     report(reading);
-    setImmediate(_ => reportContinuous(sensor));
+    return delay(sensor.typicalMeasurementTime()).
+      then(_ => setImmediate(_ => reportContinuous(sensor)));
   });
 
 bme280.open().

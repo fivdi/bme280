@@ -39,12 +39,8 @@ npm install bme280
 ```js
 const bme280 = require('bme280');
 
-const delay = milliseconds =>
-  new Promise(resolve => setTimeout(resolve, milliseconds));
-
 bme280.open().then(sensor =>
-  delay(40).
-  then(_ => sensor.read()).
+  sensor.read().
   then(reading => {
     console.log(reading);
     return sensor.close();
@@ -74,6 +70,8 @@ Sample output:
 #### open([options])
 Returns a Promise that will be resolved with a Bme280 object on success, or will be rejected if an error occurs.
 
+open waits until the first measurement has completed before resolving.
+
 The following options are supported:
 - i2cBusNumber - integer, I2C bus number, optional, default 1
 - i2cAddress - integer, BME280 I2C address, optional, default 0x77
@@ -86,6 +84,7 @@ The following options are supported:
 
 - [close()](#close)
 - [read()](#read)
+- [typicalMeasurementTime()](#typicalmeasurementtime)
 
 #### close()
 Returns a Promise that will be resolved with no arguments once the underlying resources have been released, or will be rejected if an error occurs while closing.
@@ -97,6 +96,14 @@ An object containing a sensor reading has the following properties:
 - humidity - number, relative humidity in percent
 - pressure - number, pressure in hectopascal (1 hPa = 1 millibar)
 - temperature - number, temperature in degrees Celsius
+
+#### typicalMeasurementTime()
+The typical measurement time depends on the selected values for humidity,
+pressure and temperature oversampling. typicalMeasurementTime returns the
+typical measurement time in milliseconds.
+
+When the default values for humidity, pressure and temperature oversampling
+are used, the typical measurement time is 40 milliseconds.
 
 ### Enum OVERSAMPLE
 

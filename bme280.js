@@ -261,7 +261,8 @@ class Bme280I2c {
       (MODE.NORMAL << CTRL_MEAS.MODE_POS)
     )).
     then(_ => this.readByte(REGS.CONFIG)).
-    then(configReg => this.writeByte(
+    then(configReg => delay(1).then(_ => configReg)). // Without this delay
+    then(configReg => this.writeByte( // the config reg will not be written!
       REGS.CONFIG,
       (configReg & ~CONFIG.FILTER_MASK) |
       (this._filterCoefficient << CONFIG.FILTER_POS)
@@ -295,7 +296,7 @@ class Bme280I2c {
 
     let h = tFine - 76800;
     h = (adcH - (c.h4 * 64 + c.h5 / 16384 * h)) *
-      (c.h2 / 65536 * (1.0 + c.h6 / 67108864 * h * (1 + c.h3 / 67108864 * h)));
+      (c.h2 / 65536 * (1 + c.h6 / 67108864 * h * (1 + c.h3 / 67108864 * h)));
     h = h * (1 - c.h1 * h / 524288);
 
     if (h > 100) {
@@ -361,7 +362,19 @@ class Bme280I2c {
     then(_ => this.softReset()).
     then(_ => this.waitForImageRegisterUpdate()).
     then(_ => this.readCoefficients()).
-    then(_ => this.configureSettings());
+    then(_ => this.configureSettings()).
+    then(_ => delay(this.typicalMeasurementTime()));
+  }
+
+  typicalMeasurementTime() {
+    const to = this._temperatureOversampling;
+    const po = this._pressureOversampling;
+    const ho = this._humidityOversampling;
+
+    return Math.ceil(1 +
+      (to === OVERSAMPLE.SKIPPED ? 0 : Math.pow(2, to)) +
+      (po === OVERSAMPLE.SKIPPED ? 0 : Math.pow(2, po) + 0.5) +
+      (ho === OVERSAMPLE.SKIPPED ? 0 : Math.pow(2, ho) + 0.5));
   }
 
   close() {
@@ -377,6 +390,10 @@ class Bme280I2c {
 class Bme280 {
   constructor(bme280I2c) {
     this._bme280I2c = bme280I2c;
+  }
+
+  typicalMeasurementTime() {
+    return this._bme280I2c.typicalMeasurementTime();
   }
 
   close() {

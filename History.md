@@ -1,3 +1,8 @@
+Unpublished
+===========
+
+  * add typicalMeasurementTime api
+
 0.2.0 - Oct 02 2019
 ===================
 
