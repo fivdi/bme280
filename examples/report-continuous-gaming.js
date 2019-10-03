@@ -10,8 +10,7 @@ const report = reading =>
   console.log(
     `${++count} ` +
     `${round(reading.temperature)}°C, ` +
-    `${round(reading.pressure)} hPa, ` +
-    `${round(reading.humidity)}%`
+    `${round(reading.pressure)} hPa`
   );
 
 const reportContinuous = sensor =>
@@ -22,11 +21,17 @@ const reportContinuous = sensor =>
   });
 
 /*
- * Here the BME280 is configured to run in 'normal' mode using the default
- * options. The defaults for oversampling and filtering are those recommended
- * by the BME280 datasheet for indoor navigation.
+ * Here the BME280 is configured to run in 'normal' mode using oversampling
+ * and filtering options recommended by the BME280 datasheet for gaming.
  */
-bme280.open().
+bme280.open({
+  i2cBusNumber: 1,
+  i2cBusAddress: 0x77,
+  humidityOversampling: bme280.OVERSAMPLE.SKIPPED,
+  pressureOversampling: bme280.OVERSAMPLE.X4,
+  temperatureOversampling: bme280.OVERSAMPLE.X1,
+  filterCoefficient: bme280.FILTER.F16
+}).
 then(sensor => reportContinuous(sensor)).
 catch(console.log);
 
