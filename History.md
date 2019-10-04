@@ -1,3 +1,8 @@
+Unpublished
+===========
+
+  * drop support for node.js 6 and start using await and async
+
 1.0.0 - Oct 03 2019
 ===================
 

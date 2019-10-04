@@ -12,10 +12,10 @@
     "url": "https://github.com/fivdi/bme280.git"
   },
   "engines": {
-    "node": ">=6.0.0"
+    "node": ">=8.0.0"
   },
   "dependencies": {
-    "i2c-bus": "^5.0.0"
+    "i2c-bus": "^5.1.0"
   },
   "devDependencies": {
     "jshint": "^2.10.2"

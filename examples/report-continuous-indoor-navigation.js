@@ -1,8 +1,9 @@
 'use strict';
 
 /*
- * Here the BME280 is configured to run in 'normal' mode using oversampling
- * and filtering options recommended by the BME280 datasheet for gaming.
+ * Here the BME280 is configured to run in 'normal' mode using the default
+ * options. The defaults for oversampling and filtering are those recommended
+ * by the BME280 datasheet for indoor navigation.
  */
 
 const bme280 = require('../');
@@ -12,21 +13,15 @@ const delay = millis => new Promise(resolve => setTimeout(resolve, millis));
 
 const reportContinuous = async _ => {
   try {
-    const sensor = await bme280.open({
-      i2cBusNumber: 1,
-      i2cBusAddress: 0x77,
-      humidityOversampling: bme280.OVERSAMPLE.SKIPPED,
-      pressureOversampling: bme280.OVERSAMPLE.X4,
-      temperatureOversampling: bme280.OVERSAMPLE.X1,
-      filterCoefficient: bme280.FILTER.F16
-    });
+    const sensor = await bme280.open();
 
     for (let i = 1; ; ++i) {
       const reading = await sensor.read();
       console.log(
         `${i} ` +
         `${round(reading.temperature)}°C, ` +
-        `${round(reading.pressure)} hPa`
+        `${round(reading.pressure)} hPa, ` +
+        `${round(reading.humidity)}%`
       );
       await delay(sensor.typicalMeasurementTime());
     }

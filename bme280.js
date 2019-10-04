@@ -50,10 +50,10 @@ const CHIP_ID = 0x60;
 const SOFT_RESET_COMMAND = 0xb6;
 
 // STATUS register
-const STATUS = Object.freeze({
+const STATUS = {
   IM_UPDATE_BIT: 0x01,
   MEASURING_BIT: 0x08
-});
+};
 
 // CTRL_HUM register
 const CTRL_HUM = {

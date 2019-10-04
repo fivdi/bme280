@@ -1,6 +1,6 @@
 {
   "curly": true,
-  "esversion": 6,
+  "esversion": 8,
   "eqeqeq": true,
   "latedef": false,
   "noarg": true,
