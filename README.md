@@ -80,7 +80,7 @@ const reportContinuous = async _ => {
     });
 
     for (let i = 1; ; ++i) {
-      let reading = await sensor.read();
+      const reading = await sensor.read();
       console.log(
         `${i} ` +
         `${round(reading.temperature)}°C, ` +

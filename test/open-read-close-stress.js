@@ -4,7 +4,6 @@ const bme280 = require('../');
 const util = require('./util');
 
 const round = f => (Math.round(f * 100) / 100).toFixed(2);
-const delay = millis => new Promise(resolve => setTimeout(resolve, millis));
 
 const reportContinuous = async _ => {
   try {
@@ -22,7 +21,6 @@ const reportContinuous = async _ => {
         console.log(`${i} ${util.format(reading)}`);
       }
 
-      await delay(sensor.typicalMeasurementTime());
       await sensor.close();
     }
   } catch (e) {
