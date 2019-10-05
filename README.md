@@ -83,7 +83,7 @@ const reportContinuous = async _ => {
       `${format(reading.temperature)}°C, ` +
       `${format(reading.pressure)} hPa`
     );
-    await delay(sensor.typicalMeasurementTime());
+    await delay(sensor.typicalMeasurementTime()); // 12 milliseconds, ~83Hz
   }
 
   await sensor.close();
