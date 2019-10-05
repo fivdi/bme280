@@ -8,22 +8,24 @@
 
 const bme280 = require('../');
 
-const round = f => (Math.round(f * 100) / 100).toFixed(2);
+const format = number => (Math.round(number * 100) / 100).toFixed(2);
 const delay = millis => new Promise(resolve => setTimeout(resolve, millis));
 
 const reportContinuous = async _ => {
   const sensor = await bme280.open();
 
-  for (let i = 1; ; ++i) {
+  for (let i = 1; i <= 250; ++i) {
     const reading = await sensor.read();
     console.log(
       `${i} ` +
-      `${round(reading.temperature)}°C, ` +
-      `${round(reading.pressure)} hPa, ` +
-      `${round(reading.humidity)}%`
+      `${format(reading.temperature)}°C, ` +
+      `${format(reading.pressure)} hPa, ` +
+      `${format(reading.humidity)}%`
     );
-    await delay(sensor.typicalMeasurementTime());
+    await delay(sensor.typicalMeasurementTime()); // 40 milliseconds, 25Hz
   }
+
+  await sensor.close();
 };
 
 reportContinuous().catch(console.log);

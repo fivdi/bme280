@@ -3,8 +3,6 @@
 const bme280 = require('../');
 const util = require('./util');
 
-const round = f => (Math.round(f * 100) / 100).toFixed(2);
-
 const reportContinuous = async _ => {
   for (let i = 1; i <= 1000000; ++i) {
     const sensor = await bme280.open({

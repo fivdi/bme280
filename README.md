@@ -63,7 +63,7 @@ options recommended for gaming by the BME280 datasheet.
 ```js
 const bme280 = require('bme280');
 
-const round = f => (Math.round(f * 100) / 100).toFixed(2);
+const format = number => (Math.round(number * 100) / 100).toFixed(2);
 const delay = millis => new Promise(resolve => setTimeout(resolve, millis));
 
 const reportContinuous = async _ => {
@@ -76,15 +76,17 @@ const reportContinuous = async _ => {
     filterCoefficient: bme280.FILTER.F16
   });
 
-  for (let i = 1; ; ++i) {
+  for (let i = 1; i <= 830; ++i) {
     const reading = await sensor.read();
     console.log(
       `${i} ` +
-      `${round(reading.temperature)}°C, ` +
-      `${round(reading.pressure)} hPa`
+      `${format(reading.temperature)}°C, ` +
+      `${format(reading.pressure)} hPa`
     );
     await delay(sensor.typicalMeasurementTime());
   }
+
+  await sensor.close();
 };
 
 reportContinuous().catch(console.log);
