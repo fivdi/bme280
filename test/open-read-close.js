@@ -3,11 +3,9 @@
 const bme280 = require('../');
 const util = require('./util');
 
-bme280.open().then(sensor =>
-  sensor.read().
-  then(reading => {
-    console.log(`  ${util.format(reading)}`);
-    return sensor.close();
-  })
-).catch(console.log);
+bme280.open().then(async sensor => {
+  const reading = await sensor.read();
+  console.log(`  ${util.format(reading)}`);
+  await sensor.close();
+}).catch(console.log);
 

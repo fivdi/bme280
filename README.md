@@ -39,13 +39,10 @@ npm install bme280
 ```js
 const bme280 = require('bme280');
 
-bme280.open().then(sensor =>
-  sensor.read().
-  then(reading => {
-    console.log(reading);
-    return sensor.close();
-  })
-).catch(console.log);
+bme280.open().then(async sensor => {
+  console.log(await sensor.read());
+  await sensor.close();
+}).catch(console.log);
 ```
 
 Sample output:
@@ -170,34 +167,23 @@ are used, the typical measurement time is 40 milliseconds.
 
 ### Enum OVERSAMPLE
 
-#### SKIPPED
-Measurement skipped. The corresponding property in a sensor reading object
-will be undefined.
-#### X1
-Oversampling × 1
-#### X2
-Oversampling × 2
-#### X4
-Oversampling × 4
-#### X8
-Oversampling × 8
-#### X16
-Oversampling × 16
+- **SKIPPED** - Measurement skipped. The corresponding property in a sensor
+reading object will be undefined.
+- **X1** - Oversampling × 1
+- **X2** - Oversampling × 2
+- **X4** - Oversampling × 4
+- **X8** - Oversampling × 8
+- **X16** - Oversampling × 16
 
 ### Enum FILTER
 
-Used to slow down the response to the sensor inputs.
+The filter is used to slow down the response to the sensor inputs.
 
-#### OFF
-Filter off
-#### F2
-Filter coefficient = 2
-#### F4
-Filter coefficient = 4
-#### F8
-Filter coefficient = 8
-#### F16
-Filter coefficient = 16
+- **OFF** - Filter off
+- **F2** - Filter coefficient = 2
+- **F4** - Filter coefficient = 4
+- **F8** - Filter coefficient = 8
+- **F16** - Filter coefficient = 16
 
 ## Related Packages
 

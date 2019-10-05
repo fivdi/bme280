@@ -2,11 +2,8 @@
 
 const bme280 = require('../');
 
-bme280.open().then(sensor =>
-  sensor.read().
-  then(reading => {
-    console.log(reading);
-    return sensor.close();
-  })
-).catch(console.log);
+bme280.open().then(async sensor => {
+  console.log(await sensor.read());
+  await sensor.close();
+}).catch(console.log);
 
