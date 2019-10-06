@@ -53,7 +53,7 @@ Sample output:
   humidity: 51.50271664115457
 }
 ```
-#### Configure the bme280 Using Options When Invoking `open`
+#### Configure the BME280 Using Options When Invoking `open`
 Here the BME280 is configured to run using oversampling and filtering
 options recommended for gaming by the BME280 datasheet.
 

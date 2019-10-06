@@ -247,26 +247,35 @@ class Bme280I2c {
     });
   }
 
-  configureSettings() {
-    return this.readByte(REGS.CTRL_HUM).
-    then(ctrlHumReg => this.writeByte(
+  async configureSettings() {
+    // The following comment is from the BME280 datasheet (page 30, section
+    // 5.4.6 Register 0xF5 "config"):
+    //
+    // Writes to the "config" register in normal mode may be ignored. In sleep
+    // mode writes are not ignored.
+    //
+    // So ensure that the config register is set while in sleep mode before
+    // setting the mode to normal/forced in the ctrl_meas register.
+    const configReg = await this.readByte(REGS.CONFIG);
+    await this.writeByte(
+      REGS.CONFIG,
+      (configReg & ~CONFIG.FILTER_MASK) |
+      (this._filterCoefficient << CONFIG.FILTER_POS)
+    );
+
+    const ctrlHumReg = await this.readByte(REGS.CTRL_HUM);
+    await this.writeByte(
       REGS.CTRL_HUM,
       (ctrlHumReg & ~CTRL_HUM.OSRS_H_MASK) |
       (this._humidityOversampling << CTRL_HUM.OSRS_H_POS)
-    )).
-    then(_ => this.writeByte(
+    );
+
+    await this.writeByte(
       REGS.CTRL_MEAS,
       (this._temperatureOversampling << CTRL_MEAS.OSRS_T_POS) |
       (this._pressureOversampling << CTRL_MEAS.OSRS_P_POS) |
       (MODE.NORMAL << CTRL_MEAS.MODE_POS)
-    )).
-    then(_ => this.readByte(REGS.CONFIG)).
-    then(configReg => delay(1).then(_ => configReg)). // Without this delay
-    then(configReg => this.writeByte( // the config reg will not be written!
-      REGS.CONFIG,
-      (configReg & ~CONFIG.FILTER_MASK) |
-      (this._filterCoefficient << CONFIG.FILTER_POS)
-    ));
+    );
   }
 
   readRawData() {
