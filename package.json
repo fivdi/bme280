@@ -1,6 +1,6 @@
 {
   "name": "bme280",
-  "version": "1.0.0",
+  "version": "1.1.0",
   "description": "I2C Driver for the BME280 humidity, pressure and temperature sensor",
   "main": "bme280.js",
   "scripts": {
