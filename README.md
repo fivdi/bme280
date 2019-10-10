@@ -57,7 +57,7 @@ Sample output:
 }
 ```
 
-#### Report the Humidity, Pressure and Temperature once per second in forced read mode
+#### Report the Humidity, Pressure and Temperature Once per Second in Forced Mode
 ```js
 const delay = millis => new Promise(resolve => setTimeout(resolve, millis));
 
@@ -125,7 +125,6 @@ Sample output:
 - [Class Bme280](#class-bme280)
 - [Enum OVERSAMPLE](#enum-oversample)
 - [Enum FILTER](#enum-filter)
-- [Enum MODE](#enum-mode)
 
 ### Functions
 
@@ -221,14 +220,6 @@ The filter is used to slow down the response to the sensor inputs.
 - **F4** - Filter coefficient = 4
 - **F8** - Filter coefficient = 8
 - **F16** - Filter coefficient = 16
-
-### Enum MODE
-
-Controls the sensor mode of the device.
-
-- **SLEEP** - No operation
-- **FORCED** - Perform one measurement, store results and return to sleep mode
-- **NORMAL** - Perpetual cycling of measurements and inactive periods
 
 ## Related Packages
 
