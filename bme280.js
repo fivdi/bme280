@@ -14,18 +14,18 @@ const OVERSAMPLE = {
   X16: 5
 };
 
-const MODE = {
-  SLEEP: 0,
-  FORCED: 1,
-  NORMAL: 3
-};
-
 const FILTER = {
   OFF: 0,
   F2: 1,
   F4: 2,
   F8: 3,
   F16: 4
+};
+
+const MODE = {
+  SLEEP: 0,
+  FORCED: 1,
+  NORMAL: 3
 };
 
 const REGS = {
@@ -64,6 +64,7 @@ const CTRL_HUM = {
 // CTRL_MEAS register
 const CTRL_MEAS = {
   MODE_POS: 0x00,
+  MODE_MASK: 0x03,
   OSRS_P_POS: 0x02,
   OSRS_T_POS: 0x05
 };
@@ -81,75 +82,75 @@ const open = options => {
   return Promise.resolve().then(_ => {
     options = options || {};
 
-    const errMsg = validateOpenOptions(options);
-    if (errMsg) {
-      return Promise.reject(new Error(errMsg));
-    }
+    validateOpenOptions(options);
 
     options = Object.assign({
       i2cBusNumber: DEFAULT_I2C_BUS,
       i2cAddress: DEFAULT_I2C_ADDRESS,
       humidityOversampling: OVERSAMPLE.X1,
-      pressureOversampling: OVERSAMPLE.X16,
-      temperatureOversampling: OVERSAMPLE.X2,
-      filterCoefficient: FILTER.F16
+      pressureOversampling: OVERSAMPLE.X1,
+      temperatureOversampling: OVERSAMPLE.X1,
+      filterCoefficient: FILTER.OFF,
+      forcedMode: false
     }, options);
 
-    return i2c.openPromisified(options.i2cBusNumber);
-  }).
-  then(i2cBus => {
-    const bme280I2c = new Bme280I2c(i2cBus, options);
-
-    return bme280I2c.initialize().then(_ => new Bme280(bme280I2c));
+    return i2c.openPromisified(options.i2cBusNumber).then(i2cBus => {
+      const bme280I2c = new Bme280I2c(i2cBus, options);
+      return bme280I2c.initialize().then(_ => new Bme280(bme280I2c));
+    });
   });
 };
 
 const validateOpenOptions = options => {
   if (typeof options !== 'object') {
-    return 'Expected options to be of type object.' +
-      ' Got type ' + typeof options + '.';
+    throw new Error('Expected options to be of type object.' +
+      ' Got type ' + typeof options + '.');
   }
 
-  if (options.i2cBusNumber !== undefined &&
+  if (options.hasOwnProperty('i2cBusNumber') &&
       (!Number.isSafeInteger(options.i2cBusNumber) ||
        options.i2cBusNumber < 0)) {
-    return 'Expected i2cBusNumber to be a non-negative integer.' +
-      ' Got "' + options.i2cBusNumber + '".';
+    throw new Error('Expected i2cBusNumber to be a non-negative integer.' +
+      ' Got "' + options.i2cBusNumber + '".');
   }
 
-  if (options.i2cAddress !== undefined &&
+  if (options.hasOwnProperty('i2cAddress') &&
       (!Number.isSafeInteger(options.i2cAddress) ||
        options.i2cAddress < 0 ||
        options.i2cAddress > 0x7f)) {
-    return 'Expected i2cAddress to be an integer' +
-      ' >= 0 and <= 0x7f. Got "' + options.i2cAddress + '".';
+    throw new Error('Expected i2cAddress to be an integer' +
+      ' >= 0 and <= 0x7f. Got "' + options.i2cAddress + '".');
   }
 
-  if (options.humidityOversampling !== undefined &&
+  if (options.hasOwnProperty('humidityOversampling') &&
       !Object.values(OVERSAMPLE).includes(options.humidityOversampling)) {
-    return 'Expected humidityOversampling to be a value from Enum' +
-      ' OVERSAMPLE. Got "' + options.humidityOversampling + '".';
+    throw new Error('Expected humidityOversampling to be a value from' +
+      ' Enum OVERSAMPLE. Got "' + options.humidityOversampling + '".');
   }
 
-  if (options.pressureOversampling !== undefined &&
+  if (options.hasOwnProperty('pressureOversampling') &&
       !Object.values(OVERSAMPLE).includes(options.pressureOversampling)) {
-    return 'Expected pressureOversampling to be a value from Enum' +
-      ' OVERSAMPLE. Got "' + options.pressureOversampling + '".';
+    throw new Error('Expected pressureOversampling to be a value from' +
+      ' Enum OVERSAMPLE. Got "' + options.pressureOversampling + '".');
   }
 
-  if (options.temperatureOversampling !== undefined &&
+  if (options.hasOwnProperty('temperatureOversampling') &&
       !Object.values(OVERSAMPLE).includes(options.temperatureOversampling)) {
-    return 'Expected temperatureOversampling to be a value from Enum' +
-      ' OVERSAMPLE. Got "' + options.temperatureOversampling + '".';
+    throw new Error('Expected temperatureOversampling to be a value from' +
+      ' Enum OVERSAMPLE. Got "' + options.temperatureOversampling + '".');
   }
 
-  if (options.filterCoefficient !== undefined &&
+  if (options.hasOwnProperty('filterCoefficient') &&
       !Object.values(OVERSAMPLE).includes(options.filterCoefficient)) {
-    return 'Expected filterCoefficient to be a value from Enum' +
-      ' FILTER. Got "' + options.filterCoefficient + '".';
+    throw new Error('Expected filterCoefficient to be a value from Enum' +
+      ' FILTER. Got "' + options.filterCoefficient + '".');
   }
 
-  return null;
+  if (options.hasOwnProperty('forcedMode') &&
+      typeof options.forcedMode !== 'boolean') {
+    throw new Error('Expected forcedMode to be a value of type' +
+      ' boolean. Got type "' + typeof options.forcedMode + '".');
+  }
 };
 
 class Bme280I2c {
@@ -160,6 +161,7 @@ class Bme280I2c {
     this._pressureOversampling = options.pressureOversampling;
     this._temperatureOversampling = options.temperatureOversampling;
     this._filterCoefficient = options.filterCoefficient;
+    this._forcedMode = options.forcedMode;
     this._coefficients = null;
   }
 
@@ -206,7 +208,7 @@ class Bme280I2c {
         if (tries - 1 > 0) {
           return this.waitForImageRegisterUpdate(tries - 1);
         }
-        return Promise.reject(new Error('Image register update failed'));
+        return Promise.reject(new Error('Image register update failed.'));
       }
     });
   }
@@ -270,12 +272,27 @@ class Bme280I2c {
       (this._humidityOversampling << CTRL_HUM.OSRS_H_POS)
     );
 
+    const mode = this._forcedMode ? MODE.SLEEP : MODE.NORMAL;
+
     await this.writeByte(
       REGS.CTRL_MEAS,
       (this._temperatureOversampling << CTRL_MEAS.OSRS_T_POS) |
       (this._pressureOversampling << CTRL_MEAS.OSRS_P_POS) |
-      (MODE.NORMAL << CTRL_MEAS.MODE_POS)
+      (mode << CTRL_MEAS.MODE_POS)
     );
+  }
+
+  initialize() {
+    return this.checkChipId().
+    then(_ => this.softReset()).
+    then(_ => this.waitForImageRegisterUpdate()).
+    then(_ => this.readCoefficients()).
+    then(_ => this.configureSettings()).
+    then(_ => {
+      if (!this.forcedMode) {
+        return delay(this.typicalMeasurementTime());
+      }
+    });
   }
 
   readRawData() {
@@ -366,13 +383,55 @@ class Bme280I2c {
     };
   }
 
-  initialize() {
-    return this.checkChipId().
-    then(_ => this.softReset()).
-    then(_ => this.waitForImageRegisterUpdate()).
-    then(_ => this.readCoefficients()).
-    then(_ => this.configureSettings()).
-    then(_ => delay(this.typicalMeasurementTime()));
+  read() {
+    return this.readRawData().
+    then(rawData => this.compensateRawData(rawData));
+  }
+
+  triggerForcedReadOld() {
+    return this.readByte(REGS.CTRL_MEAS).
+    then(ctrlMeas => {
+      if ((ctrlMeas & CTRL_MEAS.MODE_MASK) !==
+          (MODE.SLEEP << CTRL_MEAS.MODE_POS)) {
+        return Promise.reject(new Error(
+          'Failed to trigger forced read, sensor not in SLEEP mode.'
+        ));
+      }
+
+      return this.writeByte(
+        REGS.CTRL_MEAS,
+        (ctrlMeas & ~CTRL_MEAS.MODE_MASK) |
+        (MODE.FORCED << CTRL_MEAS.MODE_POS)
+      );
+    });
+  }
+
+  async triggerForcedRead() {
+    let ctrlMeas;
+    let inSleepMode = false;
+
+    for (let i = 0; i <= 5 && inSleepMode === false; ++i) {
+      ctrlMeas = await this.readByte(REGS.CTRL_MEAS);
+
+      if ((ctrlMeas & CTRL_MEAS.MODE_MASK) ===
+          (MODE.SLEEP << CTRL_MEAS.MODE_POS)) {
+        inSleepMode = true;
+      } else {
+        await delay(1);
+      }
+    }
+
+    if (!inSleepMode) {
+      throw new Error(
+        'Failed to trigger forced read, sensor not in SLEEP mode.'
+      );
+    }
+
+    await this.writeByte(
+      REGS.CTRL_MEAS,
+      (ctrlMeas & ~CTRL_MEAS.MODE_MASK) |
+      (MODE.FORCED << CTRL_MEAS.MODE_POS)
+    );
   }
 
   typicalMeasurementTime() {
@@ -389,16 +448,19 @@ class Bme280I2c {
   close() {
     return this._i2cBus.close();
   }
-
-  read() {
-    return this.readRawData().
-    then(rawData => this.compensateRawData(rawData));
-  }
 }
 
 class Bme280 {
   constructor(bme280I2c) {
     this._bme280I2c = bme280I2c;
+  }
+
+  read() {
+    return this._bme280I2c.read();
+  }
+
+  triggerForcedRead() {
+    return this._bme280I2c.triggerForcedRead();
   }
 
   typicalMeasurementTime() {
@@ -407,10 +469,6 @@ class Bme280 {
 
   close() {
     return this._bme280I2c.close();
-  }
-
-  read() {
-    return this._bme280I2c.read();
   }
 }
 

@@ -1,4 +1,6 @@
 #!/bin/sh
-echo open-read-close
-node open-read-close
+echo forced-read
+node forced-read
+echo read
+node read
 
