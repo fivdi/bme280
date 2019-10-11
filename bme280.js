@@ -388,25 +388,7 @@ class Bme280I2c {
     then(rawData => this.compensateRawData(rawData));
   }
 
-  triggerForcedReadOld() {
-    return this.readByte(REGS.CTRL_MEAS).
-    then(ctrlMeas => {
-      if ((ctrlMeas & CTRL_MEAS.MODE_MASK) !==
-          (MODE.SLEEP << CTRL_MEAS.MODE_POS)) {
-        return Promise.reject(new Error(
-          'Failed to trigger forced read, sensor not in SLEEP mode.'
-        ));
-      }
-
-      return this.writeByte(
-        REGS.CTRL_MEAS,
-        (ctrlMeas & ~CTRL_MEAS.MODE_MASK) |
-        (MODE.FORCED << CTRL_MEAS.MODE_POS)
-      );
-    });
-  }
-
-  async triggerForcedRead() {
+  async triggerForcedMeasurement() {
     let ctrlMeas;
     let inSleepMode = false;
 
@@ -423,7 +405,7 @@ class Bme280I2c {
 
     if (!inSleepMode) {
       throw new Error(
-        'Failed to trigger forced read, sensor not in SLEEP mode.'
+        'Failed to trigger forced measurement, sensor not in SLEEP mode.'
       );
     }
 
@@ -459,8 +441,8 @@ class Bme280 {
     return this._bme280I2c.read();
   }
 
-  triggerForcedRead() {
-    return this._bme280I2c.triggerForcedRead();
+  triggerForcedMeasurement() {
+    return this._bme280I2c.triggerForcedMeasurement();
   }
 
   typicalMeasurementTime() {

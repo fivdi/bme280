@@ -11,7 +11,7 @@ bme280.open({
   pressureOversampling: bme280.OVERSAMPLE.X16,
   temperatureOversampling: bme280.OVERSAMPLE.X16
 }).then(async sensor => {
-  await sensor.triggerForcedRead();
+  await sensor.triggerForcedMeasurement();
   await delay(sensor.typicalMeasurementTime());
   const reading = await sensor.read();
   console.log(`  ${util.format(reading)}`);

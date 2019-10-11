@@ -1,3 +1,8 @@
+Unpublished
+===========
+
+  * rename triggerForcedRead to triggerForcedMeasurement
+
 1.1.0 - Oct 10 2019
 ===================
 

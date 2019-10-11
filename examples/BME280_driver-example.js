@@ -20,7 +20,7 @@ const reportContinuous = async _ => {
   });
 
   for (let i = 1; ; ++i) {
-    await sensor.triggerForcedRead();
+    await sensor.triggerForcedMeasurement();
     await delay(sensor.typicalMeasurementTime()); // 40 milliseconds
 
     const reading = await sensor.read();

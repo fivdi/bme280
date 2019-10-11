@@ -5,7 +5,7 @@ const bme280 = require('../');
 const delay = millis => new Promise(resolve => setTimeout(resolve, millis));
 
 const forcedRead = async sensor => {
-  await sensor.triggerForcedRead();
+  await sensor.triggerForcedMeasurement();
   await delay(sensor.typicalMeasurementTime());
   console.log(await sensor.read());
 };

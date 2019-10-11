@@ -64,7 +64,7 @@ const bme280 = require('bme280');
 const delay = millis => new Promise(resolve => setTimeout(resolve, millis));
 
 const forcedRead = async sensor => {
-  await sensor.triggerForcedRead();
+  await sensor.triggerForcedMeasurement();
   await delay(sensor.typicalMeasurementTime());
   console.log(await sensor.read());
 }
@@ -178,7 +178,7 @@ the BME280 in normal mode, optional, default false
 ### Class Bme280
 
 - [read()](#read)
-- [triggerForcedRead()](#triggerforcedread)
+- [triggerForcedMeasurement()](#triggerForcedMeasurement)
 - [typicalMeasurementTime()](#typicalmeasurementtime)
 - [close()](#close)
 
@@ -191,16 +191,16 @@ An object containing a sensor reading has the following properties:
 - pressure - number, pressure in hectopascal (1 hPa = 1 millibar)
 - temperature - number, temperature in degrees Celsius
 
-#### triggerForcedRead()
+#### triggerForcedMeasurement()
 Returns a Promise that will be resolved with no arguments once the BME280 has
 been triggered to perform a forced measurement, or will be rejected if an
 error occurs.
 
-triggerForcedRead should only be called in forced mode.
+triggerForcedMeasurement should only be called in forced mode.
 
-Calling triggerForcedRead will only trigger the BME280 to perform a forced
-measurement. It will not wait for that measurement to complete. It is the
-responsibility of the application to wait for the measurement to complete
+Calling triggerForcedMeasurement will only trigger the BME280 to perform a
+forced measurement. It will not wait for that measurement to complete. It is
+the responsibility of the application to wait for the measurement to complete
 before invoking read to get the reading.
 
 #### typicalMeasurementTime()
