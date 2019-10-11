@@ -59,6 +59,8 @@ Sample output:
 
 #### Report the Humidity, Pressure and Temperature Once per Second in Forced Mode
 ```js
+const bme280 = require('bme280');
+
 const delay = millis => new Promise(resolve => setTimeout(resolve, millis));
 
 const forcedRead = async sensor => {
@@ -79,6 +81,8 @@ Here the BME280 is configured to run using oversampling and filtering
 options recommended for indoor navigation by the BME280 datasheet.
 
 ```js
+const bme280 = require('bme280');
+
 const format = number => (Math.round(number * 100) / 100).toFixed(2);
 const delay = millis => new Promise(resolve => setTimeout(resolve, millis));
 
@@ -142,13 +146,22 @@ is FILTER.OFF. Options are available for overriding these defaults.
 If desired, the BME280 can be configured to run in forced mode rather than in
 normal mode by setting option forcedMode to true.
 
-If the BME280 is confured to run in normal mode, open waits (asynchronously)
-until the BME280 has completed its first measurement before resolving.
+Normal mode comprises an automated perpetual cycling between an active
+measurement period and an inactive standby period. If the BME280 is configured
+to run in normal mode, open waits (asynchronously) until the BME280 has
+completed its first measurement before resolving. This makes it possible to
+invoke the read method immediately after invoking open to get the first
+reading.
+
+In forced mode each measurement must be explicitly triggered. If the BME280 is
+configured to run forced mode, open will not trigger a measurement. It is the
+responsibility of the application to trigger each measurement and to wait for
+the measurement to complete before invoking read to get the reading.
 
 The following options are supported:
 - i2cBusNumber - integer, I2C bus number, optional, default 1
 - i2cAddress - integer, BME280 I2C address, optional, default 0x77
-- humidityOversampling - One of the [OVERSAMPLE](#enum-oversample) enum
+- humidityOversampling - one of the [OVERSAMPLE](#enum-oversample) enum
 values, controls oversampling of humidity data, optional, default
 OVERSAMPLE.X1
 - pressureOversampling - one of the [OVERSAMPLE](#enum-oversample) enum
@@ -159,8 +172,8 @@ values, controls oversampling of temperature data, optional, default
 OVERSAMPLE.X1
 - filterCoefficient - one of the [FILTER](#enum-filter) enum values, slows
 down the response to the sensor inputs, optional, default FILTER.OFF
-- forcedMode - boolean, true to run the BME280 in forced mode, optional,
-default false
+- forcedMode - boolean, true to run the BME280 in forced mode, false to run
+the BME280 in normal mode, optional, default false
 
 ### Class Bme280
 
@@ -180,11 +193,15 @@ An object containing a sensor reading has the following properties:
 
 #### triggerForcedRead()
 Returns a Promise that will be resolved with no arguments once the BME280 has
-been triggered to perform a forced read, or will be rejected if an error
-occurs.
+been triggered to perform a forced measurement, or will be rejected if an
+error occurs.
+
+triggerForcedRead should only be called in forced mode.
 
 Calling triggerForcedRead will only trigger the BME280 to perform a forced
-read. It will not wait for that read to be performed.
+measurement. It will not wait for that measurement to complete. It is the
+responsibility of the application to wait for the measurement to complete
+before invoking read to get the reading.
 
 #### typicalMeasurementTime()
 The typical measurement time depends on the selected values for humidity,
