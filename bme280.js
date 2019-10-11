@@ -290,7 +290,7 @@ class Bme280I2c {
     then(_ => this.configureSettings()).
     then(_ => {
       if (!this.forcedMode) {
-        return delay(this.typicalMeasurementTime());
+        return delay(this.maximumMeasurementTime());
       }
     });
   }
@@ -422,9 +422,20 @@ class Bme280I2c {
     const ho = this._humidityOversampling;
 
     return Math.ceil(1 +
-      (to === OVERSAMPLE.SKIPPED ? 0 : Math.pow(2, to)) +
-      (po === OVERSAMPLE.SKIPPED ? 0 : Math.pow(2, po) + 0.5) +
-      (ho === OVERSAMPLE.SKIPPED ? 0 : Math.pow(2, ho) + 0.5));
+      (to === OVERSAMPLE.SKIPPED ? 0 : 2 * Math.pow(2, to - 1)) +
+      (po === OVERSAMPLE.SKIPPED ? 0 : 2 * Math.pow(2, po - 1) + 0.5) +
+      (ho === OVERSAMPLE.SKIPPED ? 0 : 2 * Math.pow(2, ho - 1) + 0.5));
+  }
+
+  maximumMeasurementTime() {
+    const to = this._temperatureOversampling;
+    const po = this._pressureOversampling;
+    const ho = this._humidityOversampling;
+
+    return Math.ceil(1.25 +
+      (to === OVERSAMPLE.SKIPPED ? 0 : 2.3 * Math.pow(2, to - 1)) +
+      (po === OVERSAMPLE.SKIPPED ? 0 : 2.3 * Math.pow(2, po - 1) + 0.575) +
+      (ho === OVERSAMPLE.SKIPPED ? 0 : 2.3 * Math.pow(2, ho - 1) + 0.575));
   }
 
   close() {
@@ -447,6 +458,10 @@ class Bme280 {
 
   typicalMeasurementTime() {
     return this._bme280I2c.typicalMeasurementTime();
+  }
+
+  maximumMeasurementTime() {
+    return this._bme280I2c.maximumMeasurementTime();
   }
 
   close() {

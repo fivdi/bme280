@@ -65,7 +65,7 @@ const delay = millis => new Promise(resolve => setTimeout(resolve, millis));
 
 const forcedRead = async sensor => {
   await sensor.triggerForcedMeasurement();
-  await delay(sensor.typicalMeasurementTime());
+  await delay(sensor.maximumMeasurementTime());
   console.log(await sensor.read());
 }
 
@@ -180,6 +180,7 @@ the BME280 in normal mode, optional, default false
 - [read()](#read)
 - [triggerForcedMeasurement()](#triggerForcedMeasurement)
 - [typicalMeasurementTime()](#typicalmeasurementtime)
+- [maximumMeasurementTime()](#maximummeasurementtime)
 - [close()](#close)
 
 #### read()
@@ -208,8 +209,22 @@ The typical measurement time depends on the selected values for humidity,
 pressure and temperature oversampling. typicalMeasurementTime returns the
 typical measurement time in milliseconds.
 
-When the default values for humidity, pressure and temperature oversampling
-are used, the typical measurement time is 8 milliseconds.
+If OVERSAMPLE.X1 (the default) is used for humidity, pressure and temperature
+oversampling, the typical measurement time is 8 milliseconds.
+
+If OVERSAMPLE.X16 is used for humidity, pressure and temperature oversampling,
+the typical measurement time is 98 milliseconds.
+
+#### maximumMeasurementTime()
+The maximum measurement time depends on the selected values for humidity,
+pressure and temperature oversampling. maximumMeasurementTime returns the
+maximum measurement time in milliseconds.
+
+If OVERSAMPLE.X1 (the default) is used for humidity, pressure and temperature
+oversampling, the maximum measurement time is 10 milliseconds.
+
+If OVERSAMPLE.X16 is used for humidity, pressure and temperature oversampling,
+the maximum measurement time is 113 milliseconds.
 
 #### close()
 Returns a Promise that will be resolved with no arguments once the underlying
