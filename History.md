@@ -1,5 +1,5 @@
-Unpublished
-===========
+2.0.0 - Oct 12 2019
+===================
 
   * rename triggerForcedRead to triggerForcedMeasurement
   * add maximumMeasurementTime
