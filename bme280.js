@@ -156,26 +156,21 @@ const validateOpenOptions = options => {
 class Bme280I2c {
   constructor(i2cBus, options) {
     this._i2cBus = i2cBus;
-    this._i2cAddress = options.i2cAddress;
-    this._humidityOversampling = options.humidityOversampling;
-    this._pressureOversampling = options.pressureOversampling;
-    this._temperatureOversampling = options.temperatureOversampling;
-    this._filterCoefficient = options.filterCoefficient;
-    this._forcedMode = options.forcedMode;
+    this._opts = options;
     this._coefficients = null;
   }
 
   readByte(register) {
-    return this._i2cBus.readByte(this._i2cAddress, register);
+    return this._i2cBus.readByte(this._opts.i2cAddress, register);
   }
 
   writeByte(register, byte) {
-    return this._i2cBus.writeByte(this._i2cAddress, register, byte);
+    return this._i2cBus.writeByte(this._opts.i2cAddress, register, byte);
   }
 
   readI2cBlock(register, length, buffer) {
     return this._i2cBus.readI2cBlock(
-      this._i2cAddress, register, length, buffer
+      this._opts.i2cAddress, register, length, buffer
     );
   }
 
@@ -262,22 +257,22 @@ class Bme280I2c {
     await this.writeByte(
       REGS.CONFIG,
       (configReg & ~CONFIG.FILTER_MASK) |
-      (this._filterCoefficient << CONFIG.FILTER_POS)
+      (this._opts.filterCoefficient << CONFIG.FILTER_POS)
     );
 
     const ctrlHumReg = await this.readByte(REGS.CTRL_HUM);
     await this.writeByte(
       REGS.CTRL_HUM,
       (ctrlHumReg & ~CTRL_HUM.OSRS_H_MASK) |
-      (this._humidityOversampling << CTRL_HUM.OSRS_H_POS)
+      (this._opts.humidityOversampling << CTRL_HUM.OSRS_H_POS)
     );
 
-    const mode = this._forcedMode ? MODE.SLEEP : MODE.NORMAL;
+    const mode = this._opts.forcedMode ? MODE.SLEEP : MODE.NORMAL;
 
     await this.writeByte(
       REGS.CTRL_MEAS,
-      (this._temperatureOversampling << CTRL_MEAS.OSRS_T_POS) |
-      (this._pressureOversampling << CTRL_MEAS.OSRS_P_POS) |
+      (this._opts.temperatureOversampling << CTRL_MEAS.OSRS_T_POS) |
+      (this._opts.pressureOversampling << CTRL_MEAS.OSRS_P_POS) |
       (mode << CTRL_MEAS.MODE_POS)
     );
   }
@@ -363,16 +358,16 @@ class Bme280I2c {
     let humidity = this.compensateHumidity(rawData.humidity, tFine);
 
     let temperature = tFine / 5120;
-    if (this._temperatureOversampling === OVERSAMPLE.SKIPPED) {
+    if (this._opts.temperatureOversampling === OVERSAMPLE.SKIPPED) {
       temperature = undefined;
     }
 
     pressure = pressure / 100;
-    if (this._pressureOversampling === OVERSAMPLE.SKIPPED) {
+    if (this._opts.pressureOversampling === OVERSAMPLE.SKIPPED) {
       pressure = undefined;
     }
     
-    if (this._humidityOversampling === OVERSAMPLE.SKIPPED) {
+    if (this._opts.humidityOversampling === OVERSAMPLE.SKIPPED) {
       humidity = undefined;
     }
 
@@ -417,9 +412,9 @@ class Bme280I2c {
   }
 
   typicalMeasurementTime() {
-    const to = this._temperatureOversampling;
-    const po = this._pressureOversampling;
-    const ho = this._humidityOversampling;
+    const to = this._opts.temperatureOversampling;
+    const po = this._opts.pressureOversampling;
+    const ho = this._opts.humidityOversampling;
 
     return Math.ceil(1 +
       (to === OVERSAMPLE.SKIPPED ? 0 : 2 * Math.pow(2, to - 1)) +
@@ -428,9 +423,9 @@ class Bme280I2c {
   }
 
   maximumMeasurementTime() {
-    const to = this._temperatureOversampling;
-    const po = this._pressureOversampling;
-    const ho = this._humidityOversampling;
+    const to = this._opts.temperatureOversampling;
+    const po = this._opts.pressureOversampling;
+    const ho = this._opts.humidityOversampling;
 
     return Math.ceil(1.25 +
       (to === OVERSAMPLE.SKIPPED ? 0 : 2.3 * Math.pow(2, to - 1)) +
