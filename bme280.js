@@ -104,14 +104,14 @@ const open = options => {
 const validateOpenOptions = options => {
   if (typeof options !== 'object') {
     throw new Error('Expected options to be of type object.' +
-      ' Got type ' + typeof options + '.');
+      ` Got type ${typeof options}.`);
   }
 
   if (options.hasOwnProperty('i2cBusNumber') &&
       (!Number.isSafeInteger(options.i2cBusNumber) ||
        options.i2cBusNumber < 0)) {
     throw new Error('Expected i2cBusNumber to be a non-negative integer.' +
-      ' Got "' + options.i2cBusNumber + '".');
+      ` Got "${options.i2cBusNumber}".`);
   }
 
   if (options.hasOwnProperty('i2cAddress') &&
@@ -119,37 +119,37 @@ const validateOpenOptions = options => {
        options.i2cAddress < 0 ||
        options.i2cAddress > 0x7f)) {
     throw new Error('Expected i2cAddress to be an integer' +
-      ' >= 0 and <= 0x7f. Got "' + options.i2cAddress + '".');
+      ` >= 0 and <= 0x7f. Got "${options.i2cAddress}".`);
   }
 
   if (options.hasOwnProperty('humidityOversampling') &&
       !Object.values(OVERSAMPLE).includes(options.humidityOversampling)) {
     throw new Error('Expected humidityOversampling to be a value from' +
-      ' Enum OVERSAMPLE. Got "' + options.humidityOversampling + '".');
+      ` Enum OVERSAMPLE. Got "${options.humidityOversampling}".`);
   }
 
   if (options.hasOwnProperty('pressureOversampling') &&
       !Object.values(OVERSAMPLE).includes(options.pressureOversampling)) {
     throw new Error('Expected pressureOversampling to be a value from' +
-      ' Enum OVERSAMPLE. Got "' + options.pressureOversampling + '".');
+      ` Enum OVERSAMPLE. Got "${options.pressureOversampling}".`);
   }
 
   if (options.hasOwnProperty('temperatureOversampling') &&
       !Object.values(OVERSAMPLE).includes(options.temperatureOversampling)) {
     throw new Error('Expected temperatureOversampling to be a value from' +
-      ' Enum OVERSAMPLE. Got "' + options.temperatureOversampling + '".');
+      ` Enum OVERSAMPLE. Got "${options.temperatureOversampling}".`);
   }
 
   if (options.hasOwnProperty('filterCoefficient') &&
       !Object.values(OVERSAMPLE).includes(options.filterCoefficient)) {
     throw new Error('Expected filterCoefficient to be a value from Enum' +
-      ' FILTER. Got "' + options.filterCoefficient + '".');
+      ` FILTER. Got "${options.filterCoefficient}".`);
   }
 
   if (options.hasOwnProperty('forcedMode') &&
       typeof options.forcedMode !== 'boolean') {
     throw new Error('Expected forcedMode to be a value of type' +
-      ' boolean. Got type "' + typeof options.forcedMode + '".');
+      ` boolean. Got type "${typeof options.forcedMode}".`);
   }
 };
 
