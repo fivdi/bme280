@@ -3,6 +3,7 @@ Unpublished
 
   * rename triggerForcedRead to triggerForcedMeasurement
   * add maximumMeasurementTime
+  * add support for standby period
 
 1.1.0 - Oct 10 2019
 ===================

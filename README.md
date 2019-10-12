@@ -20,9 +20,10 @@ Supports Node.js versions 8, 10 and 12.
 ## Features
 
  * Easy humidity, pressure and temperature sensing
+ * Normal and forced mode
  * Oversampling
  * Filtering
- * Normal or forced mode
+ * Standby period
  * Promise based asynchronous API
 
 ## Installation
@@ -129,6 +130,7 @@ Sample output:
 - [Class Bme280](#class-bme280)
 - [Enum OVERSAMPLE](#enum-oversample)
 - [Enum FILTER](#enum-filter)
+- [Enum STANDBY](#enum-standby)
 
 ### Functions
 
@@ -141,7 +143,8 @@ will be rejected if an error occurs.
 The default behavior of open is to configure the BME280 on I2C bus 1 at
 address 0x77 to run in normal mode. The oversampling defaults for humidity,
 pressure and temperature are OVERSAMPLE.X1 and the default filterCoefficient
-is FILTER.OFF. Options are available for overriding these defaults.
+is FILTER.OFF. The default standby period in normal mode is STANDBY.MS_0_5 for
+0.5 milliseconds. Options are available for overriding these defaults.
 
 If desired, the BME280 can be configured to run in forced mode rather than in
 normal mode by setting option forcedMode to true.
@@ -172,6 +175,9 @@ values, controls oversampling of temperature data, optional, default
 OVERSAMPLE.X1
 - filterCoefficient - one of the [FILTER](#enum-filter) enum values, slows
 down the response to the sensor inputs, optional, default FILTER.OFF
+- standby - one of the [STANDBY](#enum-standby) enum values, controls the
+inactive standby period in normal mode, optional, default STANDBY.MS_0_5 for
+0.5 milliseconds
 - forcedMode - boolean, true to run the BME280 in forced mode, false to run
 the BME280 in normal mode, optional, default false
 
@@ -252,6 +258,19 @@ The filter is used to slow down the response to the sensor inputs.
 - **F4** - Filter coefficient = 4
 - **F8** - Filter coefficient = 8
 - **F16** - Filter coefficient = 16
+
+### Enum STANDBY
+
+Controls the inactive standby period in normal mode.
+
+- **MS_0_5** - 0.5 milliseconds
+- **MS_62_5** - 62.5 milliseconds
+- **MS_125** - 125 milliseconds
+- **MS_250** - 250 milliseconds
+- **MS_500** - 500 milliseconds
+- **MS_1000** - 1000 milliseconds
+- **MS_10** - 10 milliseconds
+- **MS_20** - 20 milliseconds
 
 ## Related Packages
 

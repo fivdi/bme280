@@ -22,6 +22,17 @@ const FILTER = {
   F16: 4
 };
 
+const STANDBY = {
+  MS_0_5: 0,
+  MS_62_5: 1,
+  MS_125: 2,
+  MS_250: 3,
+  MS_500: 4,
+  MS_1000: 5,
+  MS_10: 6,
+  MS_20: 7
+};
+
 const MODE = {
   SLEEP: 0,
   FORCED: 1,
@@ -72,7 +83,9 @@ const CTRL_MEAS = {
 // CONFIG register
 const CONFIG = {
   FILTER_MASK: 0x1c,
-  FILTER_POS: 2
+  FILTER_POS: 2,
+  STANDBY_MASK: 0xe0,
+  STANDBY_POS: 5
 };
 
 const delay = milliseconds =>
@@ -91,6 +104,7 @@ const open = options => {
       pressureOversampling: OVERSAMPLE.X1,
       temperatureOversampling: OVERSAMPLE.X1,
       filterCoefficient: FILTER.OFF,
+      standby: STANDBY.MS_0_5,
       forcedMode: false
     }, options);
 
@@ -138,6 +152,12 @@ const validateOpenOptions = options => {
       !Object.values(OVERSAMPLE).includes(options.temperatureOversampling)) {
     throw new Error('Expected temperatureOversampling to be a value from' +
       ` Enum OVERSAMPLE. Got "${options.temperatureOversampling}".`);
+  }
+
+  if (options.hasOwnProperty('standby') &&
+      !Object.values(STANDBY).includes(options.standby)) {
+    throw new Error('Expected standby to be a value from Enum' +
+      ` STANDBY. Got "${options.standby}".`);
   }
 
   if (options.hasOwnProperty('filterCoefficient') &&
@@ -256,7 +276,8 @@ class Bme280I2c {
     const configReg = await this.readByte(REGS.CONFIG);
     await this.writeByte(
       REGS.CONFIG,
-      (configReg & ~CONFIG.FILTER_MASK) |
+      (configReg & ~(CONFIG.STANDBY_MASK | CONFIG.FILTER_MASK)) |
+      (this._opts.standby << CONFIG.STANDBY_POS) |
       (this._opts.filterCoefficient << CONFIG.FILTER_POS)
     );
 
@@ -475,6 +496,7 @@ class Bme280 {
 module.exports = {
   open: open,
   OVERSAMPLE: OVERSAMPLE,
-  FILTER: FILTER
+  FILTER: FILTER,
+  STANDBY: STANDBY
 };
 
