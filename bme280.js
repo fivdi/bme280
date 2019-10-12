@@ -180,7 +180,7 @@ class Bme280I2c {
       if (chipId !== CHIP_ID) {
         return Promise.reject(new Error(
           `Expected bme280 chip id to be 0x${CHIP_ID.toString(16)}` +
-          `, got chip id 0x${chipId.toString(16)}`
+          `, got chip id 0x${chipId.toString(16)}.`
         ));
       }
     }).catch(err => {
@@ -366,7 +366,7 @@ class Bme280I2c {
     if (this._opts.pressureOversampling === OVERSAMPLE.SKIPPED) {
       pressure = undefined;
     }
-    
+
     if (this._opts.humidityOversampling === OVERSAMPLE.SKIPPED) {
       humidity = undefined;
     }
@@ -385,20 +385,28 @@ class Bme280I2c {
 
   async triggerForcedMeasurement() {
     let ctrlMeas;
-    let inSleepMode = false;
+    let mode;
+    const TRIES = 5;
 
-    for (let i = 0; i <= 5 && inSleepMode === false; ++i) {
-      ctrlMeas = await this.readByte(REGS.CTRL_MEAS);
+    ctrlMeas = await this.readByte(REGS.CTRL_MEAS);
+    mode = (ctrlMeas & CTRL_MEAS.MODE_MASK) >> CTRL_MEAS.MODE_POS;
 
-      if ((ctrlMeas & CTRL_MEAS.MODE_MASK) ===
-          (MODE.SLEEP << CTRL_MEAS.MODE_POS)) {
-        inSleepMode = true;
-      } else {
-        await delay(1);
-      }
+    if (mode === MODE.NORMAL) {
+      throw new Error(
+        'triggerForcedMeasurement can\'t be invoked in normal mode.'
+      );
     }
 
-    if (!inSleepMode) {
+    // If a forced measurement is currently progress give it a chance to
+    // complete before proceeding.
+    for (let i = 1; i <= TRIES && mode !== MODE.SLEEP; ++i) {
+      const millis = Math.ceil(this.maximumMeasurementTime() / TRIES);
+      await delay(millis);
+      ctrlMeas = await this.readByte(REGS.CTRL_MEAS);
+      mode = (ctrlMeas & CTRL_MEAS.MODE_MASK) >> CTRL_MEAS.MODE_POS;
+    }
+
+    if (mode !== MODE.SLEEP) {
       throw new Error(
         'Failed to trigger forced measurement, sensor not in SLEEP mode.'
       );
