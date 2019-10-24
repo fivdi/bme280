@@ -211,9 +211,10 @@ the responsibility of the application to wait for the measurement to complete
 before invoking read to get the reading.
 
 #### typicalMeasurementTime()
+Returns the typical measurement time in milliseconds.
+
 The typical measurement time depends on the selected values for humidity,
-pressure and temperature oversampling. typicalMeasurementTime returns the
-typical measurement time in milliseconds.
+pressure and temperature oversampling.
 
 If OVERSAMPLE.X1 (the default) is used for humidity, pressure and temperature
 oversampling, the typical measurement time is 8 milliseconds.
@@ -222,9 +223,10 @@ If OVERSAMPLE.X16 is used for humidity, pressure and temperature oversampling,
 the typical measurement time is 98 milliseconds.
 
 #### maximumMeasurementTime()
+Returns the maximum measurement time in milliseconds.
+
 The maximum measurement time depends on the selected values for humidity,
-pressure and temperature oversampling. maximumMeasurementTime returns the
-maximum measurement time in milliseconds.
+pressure and temperature oversampling.
 
 If OVERSAMPLE.X1 (the default) is used for humidity, pressure and temperature
 oversampling, the maximum measurement time is 10 milliseconds.
