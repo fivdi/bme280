@@ -13,7 +13,7 @@ const delay = millis => new Promise(resolve => setTimeout(resolve, millis));
 const reportContinuous = async _ => {
   const sensor = await bme280.open({
     i2cBusNumber: 1,
-    i2cBusAddress: 0x77,
+    i2cAddress: 0x77,
     humidityOversampling: bme280.OVERSAMPLE.SKIPPED,
     pressureOversampling: bme280.OVERSAMPLE.X4,
     temperatureOversampling: bme280.OVERSAMPLE.X1,
