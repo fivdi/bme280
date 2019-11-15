@@ -1,3 +1,8 @@
+2.0.1 - Nov 15 2019
+===================
+
+  * fix i2c address property name in example codes [#1](https://github.com/fivdi/bme280/pull/1), thank you [@yuta0801](https://github.com/yuta0801)
+
 2.0.0 - Oct 12 2019
 ===================
 
