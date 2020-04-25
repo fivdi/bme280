@@ -15,7 +15,7 @@
     "node": ">=8.0.0"
   },
   "dependencies": {
-    "i2c-bus": "^5.1.0"
+    "i2c-bus": "^5.2.0"
   },
   "devDependencies": {
     "jshint": "^2.10.2"
