@@ -1,3 +1,9 @@
+Unpublished
+===========
+
+  * update dependencies (i2c-bus v5.2.0, jshint v2.11.0)
+  * add support for node.js 14
+
 2.0.1 - Nov 15 2019
 ===================
 
