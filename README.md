@@ -1,4 +1,4 @@
-[![Build Status](https://travis-ci.org/fivdi/bme280.svg?branch=master)](https://travis-ci.org/fivdi/bme280)
+[![Build Status](https://app.travis-ci.com/fivdi/bme280.svg?branch=master)](https://app.travis-ci.com/github/fivdi/bme280)
 [![npm Version](http://img.shields.io/npm/v/bme280.svg)](https://www.npmjs.com/package/bme280)
 [![Downloads Per Month](http://img.shields.io/npm/dm/bme280.svg)](https://www.npmjs.com/package/bme280)
 
