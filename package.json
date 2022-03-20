@@ -3,6 +3,7 @@
   "version": "2.1.1",
   "description": "I2C Driver for the BME280 humidity, pressure and temperature sensor",
   "main": "bme280.js",
+  "typings": "bme280.d.ts",
   "scripts": {
     "lint": "jshint *.js examples/*.js test/*.js",
     "test": "cd test && ./run-tests && cd .."
