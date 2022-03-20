@@ -43,7 +43,7 @@ export enum STANDBY {
     MS_20 = 7
 }
 
-export function open(options: options): Promise<Bme280>;
+export function open(options?: options): Promise<Bme280>;
 
 export class Bme280 {
     constructor(bme280I2c: any);
